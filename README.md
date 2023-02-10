@@ -1,5 +1,5 @@
 # Differential-Expression-Analysis
-How to perform differential expression analysis on RNA-Seq data
+A tutorial guiding the use through differential expression analysis on RNA-Seq data
 
 ## Input Data:
 - Raw Reads from sequencing, typically in fastq or fastq.gz format
