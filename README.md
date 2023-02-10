@@ -3,7 +3,7 @@ A tutorial guiding the use through differential expression analysis on RNA-Seq d
 
 ## Input Data:
 - Raw Reads from sequencing, typically in fastq or fastq.gz format
-- Reference genome in fasta format and GFF file (https://en.wikipedia.org/wiki/General_feature_format)
+- Reference genome in fasta format and GTF file
   - Ex: https://www.ncbi.nlm.nih.gov/assembly/GCF_000002985.6/
 
 ## Workflow:
@@ -56,9 +56,9 @@ Replace `$paired_forward` with the trimmed paired R1 reads and `$paired_reverse`
 ```
 htseq-count [options] <alignment_files> <gff_file>
 
-htseq-count -f sam $sam_name GCF_000002985.6_WBcel235_genomic.gff -t gene > $sam_name.features.txt
+htseq-count -f sam $sam_name GCF_000002985.6_WBcel235_genomic.gtf -t gene > $sam_name.features.txt
 ```
-This will count the reads for one sample.
+This will count the reads for one sample per gene.
 Replace `$sam_name` with the SAM file for each sample.
 
 ### 5. Build count matrix using bash commands
@@ -84,7 +84,7 @@ The resulting file gene.counts.matrix can be used in DESeq2. It should have one 
 
 View this file by typing `less -S gene.counts.matrix`
 
-### 6. Running DESeq2 (Python Implementation)
+### 6.1. Running DESeq2 (Python Implementation)
 The script `unfiltered-deseq.py` can be used to run DESeq2 in Python. This requires the pydeseq2 library from https://github.com/owkin/PyDESeq2.
 For visualization, bioinfokit is used (https://github.com/reneshbedre/bioinfokit)
 Both libraries can be installed using pip.
@@ -121,3 +121,8 @@ If we want to run DESeq2 with alpha of 0.05, no cooks refitting, samples 1-3 as 
 ```
 ./unfiltered-deseq.py gene.counts.matrix --alpha 0.05 --no_cooks --plot --normal sample1 sample2 sample3 --abnormal sample4 sample5 sample6 --out deseq
 ```
+The results from the DESeq2 run will be stored in multiple files. These correspond to the raw results, the non NaN results, the LFC shrunk results,
+and the isolated upregulated and downregulated gene csvs. By default, these upregulated and downregulated genes have an adjusted p-value < alpha
+and log2FoldChange > 1 or < -1 respectively.
+
+### 6.2. Running DESeq2 (R Alternative)
