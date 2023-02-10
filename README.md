@@ -26,7 +26,7 @@ Replace `$paired_forward`, `$unpaired_forward`, `$paired_reverse`, and `$unpaire
 `$ADAPTERS` must be a path to a fasta file with the sequencing adapters used.
 
 
-### 2. Build index for reference genome with hisat2-build (https://daehwankimlab.github.io/hisat2/manual/)
+### 2. Build index for reference genome with hisat2-build (https://daehwankimlab.github.io/hisat2/manual/):
 
 ```
 hisat2-build <reference_in> <ht2_base>
@@ -42,7 +42,7 @@ GCF_000002985.6_WBcel235_genomic.fna.idx.2.ht2
 GCF_000002985.6_WBcel235_genomic.fna.idx.8.ht2
 ```
 
-### 3. Map paired and trimmed reads to reference genome using hisat2
+### 3. Map paired and trimmed reads to reference genome using hisat2:
 ```
 hisat2 [options]* -x <hisat2-idx> {-1 <m1> -2 <m2> | -U <r> | --sra-acc <SRA accession number>} [-S <hit>]
 
@@ -52,7 +52,7 @@ This will map one set of paired and trimmed reads to the reference genome.
 Replace `$paired_forward` with the trimmed paired R1 reads and `$paired_reverse` with the trimmed paired R2 reads for each sample.
 `$sam_name` refers to the output name of the alignment file, this file will be in the SAM format (https://samtools.github.io/hts-specs/SAMv1.pdf)
 
-### 4. Counting reads in features with htseq-count
+### 4. Counting reads in features with htseq-count:
 ```
 htseq-count [options] <alignment_files> <gff_file>
 
@@ -61,7 +61,7 @@ htseq-count -f sam $sam_name GCF_000002985.6_WBcel235_genomic.gtf -t gene > $sam
 This will count the reads for one sample per gene.
 Replace `$sam_name` with the SAM file for each sample.
 
-### 5. Build count matrix using bash commands
+### 5. Build count matrix using bash commands:
 The output `sample.sam.features.txt` will be a table with two columns. The first column will be gene names, and the second will be respective counts for the sample.
 To combine these individual counts files into a single matrix we can use some bash commands.
 ```
@@ -84,7 +84,7 @@ The resulting file gene.counts.matrix can be used in DESeq2. It should have one 
 
 View this file by typing `less -S gene.counts.matrix`
 
-### 6.1. Running DESeq2 (Python Implementation)
+### 6.1. Running DESeq2 (Python Implementation):
 The script `unfiltered-deseq.py` can be used to run DESeq2 in Python. This requires the pydeseq2 library from https://github.com/owkin/PyDESeq2.
 For visualization, bioinfokit is used (https://github.com/reneshbedre/bioinfokit)
 Both libraries can be installed using pip.
@@ -125,4 +125,11 @@ The results from the DESeq2 run will be stored in multiple files. These correspo
 and the isolated upregulated and downregulated gene csvs. By default, these upregulated and downregulated genes have an adjusted p-value < alpha
 and log2FoldChange > 1 or < -1 respectively.
 
-### 6.2. Running DESeq2 (R Alternative)
+### 6.2. Running DESeq2 (R Alternative):
+The script `unfiltered-deseq.r` can be used to run DESeq2 in R. The R version will produce PCA plots and heatmaps for the data.
+The multiple test p-value adjustment method in R is different from the Python method, producing slightly different (less strict) results.
+To run the script, the libraries DESeq2, pheatmap, RColorBrewer, apeglm, ggplot2, and data.table must be installed.
+```
+Rscript ./unifiltered-deseq.r
+```
+Multiple options are hard-coded into the R script including the path to the `gene.counts.matrix` file, the affected condition, alpha value, and file output names. Manual filtering of upregulated and downregulated genes can be performed on the `"deseq_results_non_nan.csv` file.
