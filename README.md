@@ -130,6 +130,6 @@ The script `unfiltered-deseq.r` can be used to run DESeq2 in R. The R version wi
 The multiple test p-value adjustment method in R is different from the Python method, producing slightly different (less strict) results.
 To run the script, the libraries DESeq2, pheatmap, RColorBrewer, apeglm, ggplot2, and data.table must be installed.
 ```
-Rscript ./unifiltered-deseq.r
+Rscript ./deseq.r <counts csv> <affected sample prefix> <alpha value>
 ```
-Multiple options are hard-coded into the R script including the path to the `gene.counts.matrix` file, the affected condition, alpha value, and file output names. Manual filtering of upregulated and downregulated genes can be performed on the `"deseq_results_non_nan.csv` file.
+The script uses positional arguments including the path to the `gene.counts.matrix` file, the affected sample condition prefix, and the alpha value. Multiple files are produced including `raw_results.csv`, `deseq_results_non_nan.csv`, `shrunk_deseq_results_non_nan.csv`, `upregulated.csv`, `downregulated.csv`, `shrunk_upregulated.csv`, and `shrunk_downregulated.csv`. The upregulated and downregulated results are filtered on the provided alpha value. In addition, a heatmap with sample cladogram is saved to `heatmap.pdf` while a PCA plot is saved to `PCA.png`.
