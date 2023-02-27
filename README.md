@@ -126,7 +126,7 @@ and the isolated upregulated and downregulated gene csvs. By default, these upre
 and log2FoldChange > 1 or < -1 respectively.
 
 ### 6.2. Running DESeq2 (R Alternative):
-The script `unfiltered-deseq.r` can be used to run DESeq2 in R. The R version will produce PCA plots and heatmaps for the data.
+The script `deseq.r` can be used to run DESeq2 in R. The R version will produce PCA plots and heatmaps for the data.
 The multiple test p-value adjustment method in R is different from the Python method, producing slightly different (less strict) results.
 To run the script, the libraries DESeq2, pheatmap, RColorBrewer, apeglm, ggplot2, and data.table must be installed.
 ```
