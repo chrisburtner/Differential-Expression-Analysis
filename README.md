@@ -3,7 +3,7 @@ A tutorial guiding the use through differential expression analysis on RNA-Seq d
 
 ## Input Data:
 - Raw Reads from sequencing, typically in fastq or fastq.gz format
-- Reference genome in fasta format and GTF file
+- Reference genome in fasta format with GTF and GFF files
   - Ex: https://www.ncbi.nlm.nih.gov/assembly/GCF_000002985.6/
 
 ## Workflow:
@@ -43,10 +43,17 @@ GCF_000002985.6_WBcel235_genomic.fna.idx.8.ht2
 ```
 
 ### 3. Map paired and trimmed reads to reference genome using hisat2:
+The max intron length can be determined using the script `intron-length.awk`. This script is called with the gff as follows:
+```
+./intron-length.awk TYPE=CDS GCF_000002985.6_WBcel235_genomic.gff
+```
+The script will return the following info to standard out:
+`MINIMUM_INTRON_LENGTH MAXIMUM_INTRON_LENGTH MAXIMUM_SUM_INTRON_LENGTHS`
+
 ```
 hisat2 [options]* -x <hisat2-idx> {-1 <m1> -2 <m2> | -U <r> | --sra-acc <SRA accession number>} [-S <hit>]
 
-hisat2 -x GCF_000002985.6_WBcel235_genomic.fna.idx -1 $paired_forward -2 $paired_reverse -S $sam_name -p 24 --max-intronlen 10000
+hisat2 -x GCF_000002985.6_WBcel235_genomic.fna.idx -1 $paired_forward -2 $paired_reverse -S $sam_name -p 24 --max-intronlen MAXIMUM_INTRON_LENGTH
 ```
 This will map one set of paired and trimmed reads to the reference genome.
 Replace `$paired_forward` with the trimmed paired R1 reads and `$paired_reverse` with the trimmed paired R2 reads for each sample.
