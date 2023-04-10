@@ -68,9 +68,11 @@ htseq-count -f sam $sam_name GCF_000002985.6_WBcel235_genomic.gtf -t gene > $sam
 This will count the reads for one sample per gene.
 Replace `$sam_name` with the SAM file for each sample.
 
-Inspect the feature count file with less -S. Other aligners can be used as long as the output is tab delimited with the gene names in the first column and the counts in the second column.
+### 5. Build count matrix using bash commands:
+The output `sample.sam.features.txt` will be a table with two columns. The first column will be gene names, and the second will be respective counts for the sample. Other aligners can be used as long as the output is tab delimited with the gene names in the first column and the counts in the second column.
+
 ```
-$ less -S $sam_name.features.txt
+$ less -S sample.sam.features.txt
 
 ATP6	2
 CELE_2L52.1	22
@@ -85,28 +87,29 @@ __not_aligned	206645
 __alignment_not_unique	1111979
 ```
 
-### 5. Build count matrix using bash commands:
-The output `sample.sam.features.txt` will be a table with two columns. The first column will be gene names, and the second will be respective counts for the sample.
-To combine these individual counts files into a single matrix we can use some bash commands.
+To combine these individual counts files into a single matrix we can use the bash script `htseq_count_to_counts_matrix.sh`:
 ```
-# pick any one sample features table for the first step
-echo "" > genes.mat
-cat sample1.sam.features.txt | cut -f 1 >> genes.mat
-
-# loop through sample feature tables to make individual .mat files
-for table in *features.txt
-do
-  sample_name=$(basename $table | cut -f 1 -d'.')
-  echo $sample_name >> $sample_name.mat
-  cat $table | cut -f 2 >> $sample_name.mat
-done
-
-# paste tables together into single matrix
-paste -d'\t' genes.mat sample1.mat ... sampleX.mat > gene.counts.matrix
+./htseq_count_to_counts_matrix.sh sample1.sam.features.txt sample2.sam.features.txt ... sampleX.sam.features.txt
 ```
+
 The resulting file gene.counts.matrix can be used in DESeq2. It should have one column with gene names, and one column per sample with counts.
 
 View this file by typing `less -S gene.counts.matrix`
+
+```
+	sample1	sample2	sample3	sample4	sample5	sample6	sample7	sample8
+ATP6	2	0	1	4	5	4	1	3
+CELE_2L52.1	1	0	0	3	0	5	0	2
+CELE_2L52.2	0	0	0	0	0	0	0	0
+CELE_2RSSE.1	0	1	3	1	0	3	9	5
+CELE_2RSSE.3	0	0	0	0	0	0	0	0
+...
+__no_feature	13501027	15563129	15994076	14471195	15563966	16712179	13239092	14673742
+__ambiguous	70624	68283	80613	62025	68120	77720	60419	61401
+__too_low_aQual	370657	420911	475688	374362	461920	435703	349582	390528
+__not_aligned	206645	235034	224522	211690	235723	227077	192822	205528
+__alignment_not_unique	1111979	911511	1157079	775521	1041590	847218	709790	715698
+```
 
 ### 6.1. Running DESeq2 (Python Implementation):
 The script `unfiltered-deseq.py` can be used to run DESeq2 in Python. This requires the pydeseq2 library from https://github.com/owkin/PyDESeq2.
@@ -141,9 +144,9 @@ options:
 Different options can be changed depending on desired alpha value, and whether cooks refitting, independent filtering, and plotting data are desired.
 In addition you must specify the abnormal and normal sample prefixes.
 
-If we want to run DESeq2 with alpha of 0.05, no cooks refitting, samples 1-3 as normal and samples 4-6 as abnormal, we can run the following:
+If we want to run DESeq2 with alpha of 0.05, no cooks refitting, samples 1-4 as normal and samples 5-8 as abnormal, we can run the following:
 ```
-./unfiltered-deseq.py gene.counts.matrix --alpha 0.05 --no_cooks --plot --normal sample1 sample2 sample3 --abnormal sample4 sample5 sample6 --out deseq
+./unfiltered-deseq.py gene.counts.matrix --alpha 0.05 --no_cooks --plot --normal sample1 sample2 sample3 sample4 --abnormal sample5 sample6 sample7 sample8 --out deseq
 ```
 The results from the DESeq2 run will be stored in multiple files. These correspond to the raw results, the non NaN results, the LFC shrunk results,
 and the isolated upregulated and downregulated gene csvs. By default, these upregulated and downregulated genes have an adjusted p-value < alpha
