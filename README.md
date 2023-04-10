@@ -68,6 +68,23 @@ htseq-count -f sam $sam_name GCF_000002985.6_WBcel235_genomic.gtf -t gene > $sam
 This will count the reads for one sample per gene.
 Replace `$sam_name` with the SAM file for each sample.
 
+Inspect the feature count file with less -S. Other aligners can be used as long as the output is tab delimited with the gene names in the first column and the counts in the second column.
+```
+$ less -S $sam_name.features.txt
+
+ATP6	2
+CELE_2L52.1	22
+CELE_2L52.2	6
+CELE_2RSSE.1	4
+CELE_2RSSE.3	15
+...
+__no_feature	13501027
+__ambiguous	70624
+__too_low_aQual	370657
+__not_aligned	206645
+__alignment_not_unique	1111979
+```
+
 ### 5. Build count matrix using bash commands:
 The output `sample.sam.features.txt` will be a table with two columns. The first column will be gene names, and the second will be respective counts for the sample.
 To combine these individual counts files into a single matrix we can use some bash commands.
