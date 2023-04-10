@@ -152,6 +152,20 @@ The results from the DESeq2 run will be stored in multiple files. These correspo
 and the isolated upregulated and downregulated gene csvs. By default, these upregulated and downregulated genes have an adjusted p-value < alpha
 and log2FoldChange > 1 or < -1 respectively.
 
+Of most importance are the files with significant genes, which will be at `{output_prefix}_upregulated_shrunk_non_nan_unfiltered_deseq_cooks_refit.csv` and `{output_prefix}_downregulated_shrunk_non_nan_unfiltered_deseq_cooks_refit.csv`.
+
+Take a look at these output files:
+```
+$ less -S {output_prefix}_upregulated_shrunk_non_nan_unfiltered_deseq_cooks_refit.csv
+
+,baseMean,log2FoldChange,lfcSE,stat,pvalue,padj
+CELE_B0564.2,151.88632115624983,2.2893446679057856,0.4500016752259603,5.561048038462878,2.6815936391943935e-08,0.00022406055652288755
+CELE_C23H3.4,241.7169722395296,1.9885214216629015,0.5258183740515873,4.40508314073915,1.057433135709663e-05,0.022088456413555224
+CELE_C32F10.2,448.69117281224624,1.4029473790901585,0.3655887965173853,4.455525895228331,8.368779311591284e-06,0.019978667296571707
+CELE_F32A5.3,48.64588240406012,1.3517904699454375,0.3893730838546,4.140799039298287,3.460980822414412e-05,0.0444895773256671
+CELE_H01G02.3,48.12283560868961,1.2947949334902555,0.3589221400094513,4.246205050651833,2.1742166766293018e-05,0.03314852255624289
+```
+
 ### 6.2. Running DESeq2 (R Alternative):
 The script `deseq.r` can be used to run DESeq2 in R. The R version will produce PCA plots and heatmaps for the data.
 The multiple test p-value adjustment method in R is different from the Python method, producing slightly different (less strict) results.
@@ -160,3 +174,36 @@ To run the script, the libraries DESeq2, pheatmap, RColorBrewer, apeglm, ggplot2
 Rscript ./deseq.r <counts csv> <affected sample prefix> <alpha value>
 ```
 The script uses positional arguments including the path to the `gene.counts.matrix` file, the affected sample condition prefix, and the alpha value. Multiple files are produced including `raw_results.csv`, `deseq_results_non_nan.csv`, `shrunk_deseq_results_non_nan.csv`, `upregulated.csv`, `downregulated.csv`, `shrunk_upregulated.csv`, and `shrunk_downregulated.csv`. The upregulated and downregulated results are filtered on the provided alpha value. In addition, a heatmap with sample cladogram is saved to `heatmap.pdf` while a PCA plot is saved to `PCA.png`.
+
+### 7. Summarizing DESeq2 results:
+```
+$ ./summarize_deseq_data_with_gff.py -h
+
+usage: summarize_deseq_data_with_gff.py [-h] [--gff GFF] [--counts COUNTS] [--out OUT] deseq
+
+Filters gff file based on filtered fasta file
+
+positional arguments:
+  deseq              csv file in standard deseq format
+
+options:
+  -h, --help         show this help message and exit
+  --gff GFF          gff file containing functional annotations
+  --counts COUNTS    counts matrix containing read counts
+  --out OUT, -o OUT  prefix for output files
+```
+Providing a GFF file, `gene.counts.matrix`, the deseq results to the script `summarize_deseq_data_with_gff.py` will pair the GFF annotation information with the features from the counts matrix to provide context for significant features.
+```
+./summarize_deseq_data_with_gff.py --gff GCF_000002985.6_WBcel235_genomic.gff --counts gene.counts.matrix --out upregulated_summary deseq_upregulated_shrunk_non_nan_unfiltered_deseq_cooks_refit.csv
+```
+
+```
+$ less -S upregulated_summary.csv
+
+feature,annotation,EV_1,EV_2,EV_3,EV_4,R10_1,R10_2,R10_3,R10_4,baseMean,log2FoldChange,lfcSE,stat,pvalue,padj
+CELE_B0564.2,Fe2OG dioxygenase domain-containing protein,42,56,44,47,78,473,284,240,151.88632115624983,2.2893446679057856,0.4500016752259603,5.561048038462878,2.6815936391943935e-08,0.00022406055652288755
+CELE_C23H3.4,Serine palmitoyltransferase 1,52,95,102,98,77,724,455,415,241.7169722395296,1.9885214216629015,0.5258183740515873,4.40508314073915,1.057433135709663e-05,0.022088456413555224
+CELE_C32F10.2,Retinoblastoma-like protein homolog lin-35,209,209,281,215,258,952,706,857,448.69117281224624,1.4029473790901585,0.3655887965173853,4.455525895228331,8.368779311591284e-06,0.019978667296571707
+CELE_F32A5.3,Serine carboxypeptidase ctsa-3.1,38,18,28,14,66,88,59,82,48.64588240406012,1.3517904699454375,0.3893730838546,4.140799039298287,3.460980822414412e-05,0.0444895773256671
+CELE_H01G02.3,Uncharacterized protein,27,33,19,23,51,107,77,55,48.12283560868961,1.2947949334902555,0.3589221400094513,4.246205050651833,2.1742166766293018e-05,0.03314852255624289
+```
